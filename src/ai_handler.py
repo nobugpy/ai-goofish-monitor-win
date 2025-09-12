@@ -28,6 +28,8 @@ from src.config import (
     BARK_URL,
     PCURL_TO_MOBILE,
     WX_BOT_URL,
+    TELEGRAM_BOT_TOKEN,
+    TELEGRAM_CHAT_ID,
     WEBHOOK_URL,
     WEBHOOK_METHOD,
     WEBHOOK_HEADERS,
@@ -199,8 +201,8 @@ def validate_ai_response_format(parsed_response):
 @retry_on_failure(retries=3, delay=5)
 async def send_ntfy_notification(product_data, reason):
     """当发现推荐商品时，异步发送一个高优先级的 ntfy.sh 通知。"""
-    if not NTFY_TOPIC_URL and not WX_BOT_URL and not (GOTIFY_URL and GOTIFY_TOKEN) and not BARK_URL and not WEBHOOK_URL:
-        safe_print("警告：未在 .env 文件中配置任何通知服务 (NTFY_TOPIC_URL, WX_BOT_URL, GOTIFY_URL/TOKEN, BARK_URL, WEBHOOK_URL)，跳过通知。")
+    if not NTFY_TOPIC_URL and not WX_BOT_URL and not (GOTIFY_URL and GOTIFY_TOKEN) and not BARK_URL and not (TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID) and not WEBHOOK_URL:
+        safe_print("警告：未在 .env 文件中配置任何通知服务 (NTFY_TOPIC_URL, WX_BOT_URL, GOTIFY_URL/TOKEN, BARK_URL, TELEGRAM_BOT_TOKEN/CHAT_ID, WEBHOOK_URL)，跳过通知。")
         return
 
     title = product_data.get('商品标题', 'N/A')
@@ -361,6 +363,56 @@ async def send_ntfy_notification(product_data, reason):
             safe_print(f"   -> 发送企业微信通知失败: {e}")
         except Exception as e:
             safe_print(f"   -> 发送企业微信通知时发生未知错误: {e}")
+
+    # --- 发送 Telegram 机器人通知 ---
+    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+        try:
+            safe_print(f"   -> 正在发送 Telegram 通知...")
+            
+            # 构建 Telegram API URL
+            telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+            
+            # 格式化消息内容
+            telegram_message = f"🚨 <b>新推荐!</b>\n\n"
+            telegram_message += f"<b>{title[:50]}...</b>\n\n"
+            telegram_message += f"💰 价格: {price}\n"
+            telegram_message += f"📝 原因: {reason}\n"
+            
+            # 添加链接
+            if PCURL_TO_MOBILE:
+                mobile_link = convert_goofish_link(link)
+                telegram_message += f"📱 <a href='{mobile_link}'>手机端链接</a>\n"
+            telegram_message += f"💻 <a href='{link}'>电脑端链接</a>"
+            
+            # 构建请求负载
+            telegram_payload = {
+                "chat_id": TELEGRAM_CHAT_ID,
+                "text": telegram_message,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": False
+            }
+            
+            headers = {"Content-Type": "application/json"}
+            loop = asyncio.get_running_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: requests.post(
+                    telegram_api_url,
+                    json=telegram_payload,
+                    headers=headers,
+                    timeout=10
+                )
+            )
+            response.raise_for_status()
+            result = response.json()
+            if result.get("ok"):
+                safe_print("   -> Telegram 通知发送成功。")
+            else:
+                safe_print(f"   -> Telegram 通知发送失败: {result.get('description', '未知错误')}")
+        except requests.exceptions.RequestException as e:
+            safe_print(f"   -> 发送 Telegram 通知失败: {e}")
+        except Exception as e:
+            safe_print(f"   -> 发送 Telegram 通知时发生未知错误: {e}")
 
     # --- 发送通用 Webhook 通知 ---
     if WEBHOOK_URL:
