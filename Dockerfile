@@ -32,10 +32,18 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright
 # 从 builder 阶段复制虚拟环境，这样我们就可以使用 playwright 命令
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-# 安装所有运行浏览器所需的系统级依赖（包括libzbar0）
+# 安装所有运行浏览器所需的系统级依赖（包括libzbar0）和网络诊断工具
 RUN sed -i 's|http://deb.debian.org|https://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources \
     && apt-get update \
     && apt-get install -y libzbar0 \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        wget \
+        ping \
+        dnsutils \
+        iproute2 \
+        netcat-openbsd \
+        telnet \
     && playwright install-deps chromium \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
