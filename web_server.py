@@ -79,6 +79,8 @@ class NotificationSettings(BaseModel):
     GOTIFY_TOKEN: Optional[str] = None
     BARK_URL: Optional[str] = None
     WX_BOT_URL: Optional[str] = None
+    TELEGRAM_BOT_TOKEN: Optional[str] = None
+    TELEGRAM_CHAT_ID: Optional[str] = None
     WEBHOOK_URL: Optional[str] = None
     WEBHOOK_METHOD: Optional[str] = "POST"
     WEBHOOK_HEADERS: Optional[str] = None
@@ -129,6 +131,8 @@ def load_notification_settings():
         "GOTIFY_TOKEN": config.get("GOTIFY_TOKEN", ""),
         "BARK_URL": config.get("BARK_URL", ""),
         "WX_BOT_URL": config.get("WX_BOT_URL", ""),
+        "TELEGRAM_BOT_TOKEN": config.get("TELEGRAM_BOT_TOKEN", ""),
+        "TELEGRAM_CHAT_ID": config.get("TELEGRAM_CHAT_ID", ""),
         "WEBHOOK_URL": config.get("WEBHOOK_URL", ""),
         "WEBHOOK_METHOD": config.get("WEBHOOK_METHOD", "POST"),
         "WEBHOOK_HEADERS": config.get("WEBHOOK_HEADERS", ""),
@@ -152,8 +156,9 @@ def save_notification_settings(settings: dict):
     # Update or add notification settings
     setting_keys = [
         "NTFY_TOPIC_URL", "GOTIFY_URL", "GOTIFY_TOKEN", "BARK_URL",
-        "WX_BOT_URL", "WEBHOOK_URL", "WEBHOOK_METHOD", "WEBHOOK_HEADERS",
-        "WEBHOOK_CONTENT_TYPE", "WEBHOOK_QUERY_PARAMETERS", "WEBHOOK_BODY", "PCURL_TO_MOBILE"
+        "WX_BOT_URL", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "WEBHOOK_URL", 
+        "WEBHOOK_METHOD", "WEBHOOK_HEADERS", "WEBHOOK_CONTENT_TYPE", "WEBHOOK_QUERY_PARAMETERS", 
+        "WEBHOOK_BODY", "PCURL_TO_MOBILE"
     ]
 
     # Create a dictionary of existing settings

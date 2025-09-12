@@ -484,6 +484,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <div class="form-group">
+                    <label for="telegram-bot-token">Telegram Bot Token</label>
+                    <input type="text" id="telegram-bot-token" name="TELEGRAM_BOT_TOKEN" value="${settings.TELEGRAM_BOT_TOKEN || ''}" placeholder="例如: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz123456789">
+                    <p class="form-hint">Telegram 机器人的 Token，从 @BotFather 获取</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telegram-chat-id">Telegram Chat ID</label>
+                    <input type="text" id="telegram-chat-id" name="TELEGRAM_CHAT_ID" value="${settings.TELEGRAM_CHAT_ID || ''}" placeholder="例如: 123456789">
+                    <p class="form-hint">Telegram Chat ID，从 @userinfobot 获取</p>
+                </div>
+                
+                <div class="form-group">
                     <label for="webhook-url">通用 Webhook URL</label>
                     <input type="text" id="webhook-url" name="WEBHOOK_URL" value="${settings.WEBHOOK_URL || ''}" placeholder="例如: https://your-webhook-url.com/endpoint">
                     <p class="form-hint">通用 Webhook 的 URL 地址</p>
