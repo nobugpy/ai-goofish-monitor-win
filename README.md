@@ -15,15 +15,15 @@
 - **Docker 一键部署**: 提供 `docker-compose` 配置，实现快速、标准化的容器化部署。
 - **健壮的反爬策略**: 模拟真人操作，包含多种随机延迟和用户行为，提高稳定性。
 
-## 页面截图
+## 🖼 页面截图
 
-**后台任务管理**
+### 后台任务管理
 ![img.png](static/img.png)
 
-**后台监控截图**
+### 后台监控截图
 ![img_1.png](static/img_1.png)
 
-**ntf通知截图**
+### ntfy通知截图
 ![img_2.png](static/img_2.png)
 
 ## 🚀 快速开始 (Web UI 推荐)
@@ -49,77 +49,79 @@ pip install -r requirements.txt
 
 ### 第 2 步: 基础配置
 
-1. **配置环境变量**: 复制`.env.example`文件并命名为`.env`，并修改里面的内容。  
+1. **配置环境变量**: 复制`.env.example`文件并命名为`.env`，并修改里面的内容。
 
-    Windows使用命令行：
+   Windows使用命令行：
 
     ```cmd
     copy .env.example .env
     ```
 
-    Linux/MacOS使用命令行：
+   Linux/MacOS使用命令行：
 
     ```shell
     cp .env.example .env
     ```
 
-    `.env` 文件中的所有可用配置项如下：
+   `.env` 文件中的所有可用配置项如下：
 
-    | 环境变量 | 说明 | 是否必填 | 注意事项 |
-    | :--- | :--- | :--- | :--- |
-    | `OPENAI_API_KEY` | 你的AI模型服务商提供的API Key。 | 是 | 对于某些本地或特定代理的服务，此项可能为可选。 |
-    | `OPENAI_BASE_URL` | AI模型的API接口地址，必须兼容OpenAI格式。 | 是 | 请填写API的基础路径，例如 `https://ark.cn-beijing.volces.com/api/v3/`。 |
-    | `OPENAI_MODEL_NAME` | 你要使用的具体模型名称。 | 是 | **必须**选择一个支持图片分析的多模态模型，如 `doubao-seed-1-6-250615`, `gemini-2.5-pro` 等。 |
-    | `PROXY_URL` | (可选) 需要翻墙时配置的HTTP/S代理。 | 否 | 支持 `http://` 和 `socks5://` 格式。例如 `http://127.0.0.1:7890`。 |
-    | `NTFY_TOPIC_URL` | (可选) [ntfy.sh](https://ntfy.sh/) 的主题URL，用于发送通知。 | 否 | 如果留空，将不会发送 ntfy 通知。 |
-    | `GOTIFY_URL` | (可选) Gotify 服务地址。 | 否 | 例如 `https://push.example.de`。 |
-    | `GOTIFY_TOKEN` | (可选) Gotify 应用的 Token。 | 否 | |
-    | `BARK_URL` | (可选) [Bark](https://bark.day.app/) 的推送地址。 | 否 | 例如 `https://api.day.app/your_key`。如果留空，将不发送 Bark 通知。 |
-    | `WX_BOT_URL` | (可选) 企业微信群机器人的 Webhook 地址。 | 否 | 如果留空，将不会发送企业微信通知。注意：在 `.env` 文件中配置此值时，请确保 URL 地址用双引号包围，否则可能导致配置不生效。 |
-    | `WEBHOOK_URL` | (可选) 通用 Webhook 的 URL 地址。 | 否 | 如果留空，将不发送通用 Webhook 通知。 |
-    | `WEBHOOK_METHOD` | (可选) Webhook 请求方法。 | 否 | 支持 `GET` 或 `POST`，默认为 `POST`。 |
-    | `WEBHOOK_HEADERS` | (可选) Webhook 的自定义请求头。 | 否 | 必须是有效的 JSON 字符串，例如 `'{"Authorization": "Bearer xxx"}'`。 |
-    | `WEBHOOK_CONTENT_TYPE` | (可选) POST 请求的内容类型。 | 否 | 支持 `JSON` 或 `FORM`，默认为 `JSON`。 |
-    | `WEBHOOK_QUERY_PARAMETERS` | (可选) GET 请求的查询参数。 | 否 | JSON 字符串，支持 `{{title}}` 和 `{{content}}` 占位符。 |
-    | `WEBHOOK_BODY` | (可选) POST 请求的请求体。 | 否 | JSON 字符串，支持 `{{title}}` 和 `{{content}}` 占位符。 |
-    | `LOGIN_IS_EDGE` | 是否使用 Edge 浏览器进行登录和爬取。 | 否 | 默认为 `false`，使用 Chrome/Chromium。 |
-    | `PCURL_TO_MOBILE` | 是否在通知中将电脑版商品链接转换为手机版。 | 否 | 默认为 `true`。 |
-    | `RUN_HEADLESS` | 是否以无头模式运行爬虫浏览器。 | 否 | 默认为 `true`。在本地调试遇到验证码时可设为 `false` 手动处理。**Docker部署时必须为 `true`**。 |
-    | `AI_DEBUG_MODE` | 是否开启AI调试模式。 | 否 | 默认为 `false`。开启后会在控制台打印详细的AI请求和响应日志。 |
-    | `SKIP_AI_ANALYSIS` | 是否跳过AI分析并直接发送通知。 | 否 | 默认为 `false`。设置为 `true` 时，所有爬取到的商品将直接发送通知而不经过AI分析。 |
-    | `ENABLE_THINKING` | 是否启用enable_thinking参数。 | 否 | 默认为 `false`。某些AI模型需要此参数，而有些则不支持。如果遇到"Invalid JSON payload received. Unknown name "enable_thinking""错误，请尝试设置为 `false`。 |
-    | `SERVER_PORT` | Web UI服务的运行端口。 | 否 | 默认为 `8000`。 |
-    | `WEB_USERNAME` | Web界面登录用户名。 | 否 | 默认为 `admin`。生产环境请务必修改。 |
-    | `WEB_PASSWORD` | Web界面登录密码。 | 否 | 默认为 `admin123`。生产环境请务必修改为强密码。 |
+   | 环境变量 | 说明 | 是否必填 | 注意事项 |
+       | :--- | :--- | :---: | :--- |
+   | `OPENAI_API_KEY` | 你的AI模型服务商提供的API Key。 | 是 | 对于某些本地或特定代理的服务，此项可能为可选。 |
+   | `OPENAI_BASE_URL` | AI模型的API接口地址，必须兼容OpenAI格式。 | 是 | 请填写API的基础路径，例如 `https://ark.cn-beijing.volces.com/api/v3/`。 |
+   | `OPENAI_MODEL_NAME` | 你要使用的具体模型名称。 | 是 | **必须**选择一个支持图片分析的多模态模型，如 `doubao-seed-1-6-250615`, `gemini-2.5-pro` 等。 |
+   | `PROXY_URL` | (可选) 需要翻墙时配置的HTTP/S代理。 | 否 | 支持 `http://` 和 `socks5://` 格式。例如 `http://127.0.0.1:7890`。 |
+   | `NTFY_TOPIC_URL` | (可选) [ntfy.sh](https://ntfy.sh/) 的主题URL，用于发送通知。 | 否 | 如果留空，将不会发送 ntfy 通知。 |
+   | `GOTIFY_URL` | (可选) Gotify 服务地址。 | 否 | 例如 `https://push.example.de`。 |
+   | `GOTIFY_TOKEN` | (可选) Gotify 应用的 Token。 | 否 |  |
+   | `BARK_URL` | (可选) [Bark](https://bark.day.app/) 的推送地址。 | 否 | 例如 `https://api.day.app/your_key`。如果留空，将不发送 Bark 通知。 |
+   | `WX_BOT_URL` | (可选) 企业微信群机器人的 Webhook 地址。 | 否 | 如果留空，将不会发送企业微信通知。注意：在 `.env` 文件中配置此值时，请确保 URL 地址用双引号包围，否则可能导致配置不生效。 |
+   | `WEBHOOK_URL` | (可选) 通用 Webhook 的 URL 地址。 | 否 | 如果留空，将不发送通用 Webhook 通知。 |
+   | `WEBHOOK_METHOD` | (可选) Webhook 请求方法。 | 否 | 支持 `GET` 或 `POST`，默认为 `POST`。 |
+   | `WEBHOOK_HEADERS` | (可选) Webhook 的自定义请求头。 | 否 | 必须是有效的 JSON 字符串，例如 `'{"Authorization": "Bearer xxx"}'`。 |
+   | `WEBHOOK_CONTENT_TYPE` | (可选) POST 请求的内容类型。 | 否 | 支持 `JSON` 或 `FORM`，默认为 `JSON`。 |
+   | `WEBHOOK_QUERY_PARAMETERS` | (可选) GET 请求的查询参数。 | 否 | JSON 字符串，支持 `{{title}}` 和 `{{content}}` 占位符。 |
+   | `WEBHOOK_BODY` | (可选) POST 请求的请求体。 | 否 | JSON 字符串，支持 `{{title}}` 和 `{{content}}` 占位符。 |
+   | `LOGIN_IS_EDGE` | 是否使用 Edge 浏览器进行登录和爬取。 | 否 | 默认为 `false`，使用 Chrome/Chromium。 |
+   | `PCURL_TO_MOBILE` | 是否在通知中将电脑版商品链接转换为手机版。 | 否 | 默认为 `true`。 |
+   | `RUN_HEADLESS` | 是否以无头模式运行爬虫浏览器。 | 否 | 默认为 `true`。在本地调试遇到验证码时可设为 `false` 手动处理。**Docker部署时必须为 `true`**。 |
+   | `AI_DEBUG_MODE` | 是否开启AI调试模式。 | 否 | 默认为 `false`。开启后会在控制台打印详细的AI请求和响应日志。 |
+   | `SKIP_AI_ANALYSIS` | 是否跳过AI分析并直接发送通知。 | 否 | 默认为 `false`。设置为 `true` 时，所有爬取到的商品将直接发送通知而不经过AI分析。 |
+   | `ENABLE_THINKING` | 是否启用enable_thinking参数。 | 否 | 默认为 `false`。某些AI模型需要此参数，而有些则不支持。如果遇到"Invalid JSON payload received. Unknown name "enable_thinking""错误，请尝试设置为 `false`。 |
+   | `SERVER_PORT` | Web UI服务的运行端口。 | 否 | 默认为 `8000`。 |
+   | `WEB_USERNAME` | Web界面登录用户名。 | 否 | 默认为 `admin`。生产环境请务必修改。 |
+   | `WEB_PASSWORD` | Web界面登录密码。 | 否 | 默认为 `admin123`。生产环境请务必修改为强密码。 |
 
-    > 💡 **调试建议**: 如果在配置AI API时遇到404错误，建议先使用阿里云或火山提供的API进行调试，确保基础功能正常后再尝试其他API提供商。某些API提供商可能存在兼容性问题或需要特殊的配置。
+   > 💡 **调试建议**: 如果在配置AI API时遇到404错误，建议先使用阿里云或火山提供的API进行调试，确保基础功能正常后再尝试其他API提供商。某些API提供商可能存在兼容性问题或需要特殊的配置。
 
-    > 🔐 **安全提醒**: Web界面已启用Basic认证保护。默认用户名和密码为 `admin` / `admin123`，生产环境请务必修改为强密码！
+   > 🔐 **安全提醒**: Web界面已启用Basic认证保护。默认用户名和密码为 `admin` / `admin123`，生产环境请务必修改为强密码！
 
 2. **获取登录状态 (重要!)**: 为了让爬虫能够以登录状态访问闲鱼，必须先提供有效的登录凭证。我们推荐使用Web UI来完成此操作：
 
-    **推荐方式：通过 Web UI 更新**
+   **推荐方式：通过 Web UI 更新**
+
     1. 先跳过此步骤，直接执行第3步启动Web服务。
     2. 打开Web UI后，进入 **"系统设置"** 页面。
     3. 找到 "登录状态文件"，点击 **"手动更新"** 按钮。
     4. 按照弹窗内的详细指引操作：
-       - 在您的个人电脑上，使用Chrome浏览器安装[闲鱼登录状态提取扩展](https://chromewebstore.google.com/detail/xianyu-login-state-extrac/eidlpfjiodpigmfcahkmlenhppfklcoa)
-       - 打开并登录闲鱼官网
-       - 登录成功后，点击浏览器工具栏中的扩展图标
-       - 点击"提取登录状态"按钮获取登录信息
-       - 点击"复制到剪贴板"按钮
-       - 将复制的内容粘贴到Web UI中保存即可
+        - 在您的个人电脑上，使用Chrome浏览器安装[闲鱼登录状态提取扩展](https://chromewebstore.google.com/detail/xianyu-login-state-extrac/eidlpfjiodpigmfcahkmlenhppfklcoa)
+        - 打开并登录闲鱼官网
+        - 登录成功后，点击浏览器工具栏中的扩展图标
+        - 点击"提取登录状态"按钮获取登录信息
+        - 点击"复制到剪贴板"按钮
+        - 将复制的内容粘贴到Web UI中保存即可
 
-    这种方式无需在服务器上运行带图形界面的程序，最为便捷。
+   这种方式无需在服务器上运行带图形界面的程序，最为便捷。
 
-    **备用方式：运行登录脚本**
-    如果您可以在本地或带桌面的服务器上运行程序，也可以使用传统的脚本方式：
+   **备用方式：运行登录脚本**
+
+   如果您可以在本地或带桌面的服务器上运行程序，也可以使用传统的脚本方式：
 
     ```bash
     python login.py
     ```
 
-    运行后会弹出一个浏览器窗口，请使用**手机闲鱼App扫描二维码**完成登录。成功后，程序会自动关闭，并在项目根目录生成一个 `xianyu_state.json` 文件。
+   运行后会弹出一个浏览器窗口，请使用**手机闲鱼App扫描二维码**完成登录。成功后，程序会自动关闭，并在项目根目录生成一个 `xianyu_state.json` 文件。
 
 ### 第 3 步: 启动 Web 服务
 
@@ -133,8 +135,8 @@ python web_server.py
 
 在浏览器中打开 `http://127.0.0.1:8000` 访问管理后台。
 
-1. 在 **“任务管理”** 页面，点击 **“创建新任务”**。
-2. 在弹出的窗口中，用自然语言描述你的购买需求（例如：“我想买一台95新以上的索尼A7M4相机，预算1万3以内，快门数低于5000”），并填写任务名称、关键词等信息。
+1. 在 **"任务管理"** 页面，点击 **"创建新任务"**。
+2. 在弹出的窗口中，用自然语言描述你的购买需求（例如："我想买一台95新以上的索尼A7M4相机，预算1万3以内，快门数低于5000"），并填写任务名称、关键词等信息。
 3. 点击创建，AI将自动为你生成一套复杂的分析标准。
 4. 回到主界面，为任务添加定时或直接点击启动，开始自动化监控！
 
@@ -156,16 +158,17 @@ python web_server.py
 3. **创建 `.env` 文件**: 参考 **[快速开始](#-快速开始-web-ui-推荐)** 部分的说明，在项目根目录创建并填写 `.env` 文件。
 
 4. **获取登录状态 (关键步骤!)**: Docker容器内无法进行扫码登录。请在**启动容器后**，通过访问Web UI来设置登录状态：
+
     1. （在宿主机上）执行 `docker-compose up -d` 启动服务。
     2. 在浏览器中打开 `http://127.0.0.1:8000` 访问Web UI。
     3. 进入 **"系统设置"** 页面，点击 **"手动更新"** 按钮。
     4. 按照弹窗内的指引操作：
-       - 在您的个人电脑上，使用Chrome浏览器安装[闲鱼登录状态提取扩展](https://chromewebstore.google.com/detail/xianyu-login-state-extrac/eidlpfjiodpigmfcahkmlenhppfklcoa)
-       - 打开并登录闲鱼官网
-       - 登录成功后，点击浏览器工具栏中的扩展图标
-       - 点击"提取登录状态"按钮获取登录信息
-       - 点击"复制到剪贴板"按钮
-       - 将复制的内容粘贴到Web UI中保存即可
+        - 在您的个人电脑上，使用Chrome浏览器安装[闲鱼登录状态提取扩展](https://chromewebstore.google.com/detail/xianyu-login-state-extrac/eidlpfjiodpigmfcahkmlenhppfklcoa)
+        - 打开并登录闲鱼官网
+        - 登录成功后，点击浏览器工具栏中的扩展图标
+        - 点击"提取登录状态"按钮获取登录信息
+        - 点击"复制到剪贴板"按钮
+        - 将复制的内容粘贴到Web UI中保存即可
 
 > ℹ️ **关于Python版本**: 使用Docker部署时，项目使用的是Dockerfile中指定的Python 3.11版本，无需担心本地Python版本兼容性问题。
 
@@ -187,7 +190,7 @@ docker-compose up --build -d
 
 ### 第 3 步: 访问和管理
 
-- **访问 Web UI**: 在浏览器中打开 `http://127.0.0.1:8000`。
+- **访问 Web UI**: 在浏览器中打开 `http://127.0.0.1:8000`
 - **查看实时日志**: `docker-compose logs -f`
 - **停止容器**: `docker-compose stop`
 - **启动已停止的容器**: `docker-compose start`
@@ -195,20 +198,27 @@ docker-compose up --build -d
 
 ## 📸 Web UI 功能一览
 
-- **任务管理**:
-  - **AI创建任务**: 使用自然语言描述需求，一键生成监控任务和配套AI分析标准。
-  - **可视化编辑与控制**: 在表格中直接修改任务参数（如关键词、价格、定时规则等），并能独立启/停、删除每个任务。
-  - **定时调度**: 为任务配置 Cron 表达式，实现自动化周期性运行。
-- **结果查看**:
-  - **卡片式浏览**: 以图文卡片形式清晰展示每个符合条件的商品。
-  - **智能筛选与排序**: 可一键筛选出所有被AI标记为“推荐”的商品，并支持按爬取时间、发布时间、价格等多种方式排序。
-  - **深度详情**: 点击即可查看每个商品的完整抓取数据和AI分析的详细JSON结果。
-- **运行日志**:
-  - **实时日志流**: 在网页上实时查看爬虫运行的详细日志，方便追踪进度和排查问题。
-  - **日志管理**: 支持自动刷新、手动刷新和一键清空日志。
-- **系统设置**:
-  - **状态检查**: 一键检查 `.env` 配置、登录状态等关键依赖是否正常。
-  - **Prompt在线编辑**: 直接在网页上编辑和保存用于AI分析的 `prompt` 文件，实时调整AI的思考逻辑。
+### 任务管理
+
+- **AI创建任务**: 使用自然语言描述需求，一键生成监控任务和配套AI分析标准。
+- **可视化编辑与控制**: 在表格中直接修改任务参数（如关键词、价格、定时规则等），并能独立启/停、删除每个任务。
+- **定时调度**: 为任务配置 Cron 表达式，实现自动化周期性运行。
+
+### 结果查看
+
+- **卡片式浏览**: 以图文卡片形式清晰展示每个符合条件的商品。
+- **智能筛选与排序**: 可一键筛选出所有被AI标记为"推荐"的商品，并支持按爬取时间、发布时间、价格等多种方式排序。
+- **深度详情**: 点击即可查看每个商品的完整抓取数据和AI分析的详细JSON结果。
+
+### 运行日志
+
+- **实时日志流**: 在网页上实时查看爬虫运行的详细日志，方便追踪进度和排查问题。
+- **日志管理**: 支持自动刷新、手动刷新和一键清空日志。
+
+### 系统设置
+
+- **状态检查**: 一键检查 `.env` 配置、登录状态等关键依赖是否正常。
+- **Prompt在线编辑**: 直接在网页上编辑和保存用于AI分析的 `prompt` 文件，实时调整AI的思考逻辑。
 
 ## 🚀 工作流程
 
@@ -249,6 +259,7 @@ WEB_PASSWORD=admin123
 #### 默认凭据
 
 如果未在 `.env` 文件中设置认证凭据，系统将使用以下默认值：
+
 - 用户名：`admin`
 - 密码：`admin123`
 
@@ -274,13 +285,13 @@ WEB_PASSWORD=admin123
 
 详细配置说明请参考 [AUTH_README.md](AUTH_README.md)。
 
-## 常见问题 (FAQ)
+## ❓ 常见问题 (FAQ)
 
 我们整理了一份详细的常见问题解答文档，覆盖了从环境配置、AI设置到反爬虫策略的各类问题。
 
 👉 **[点击此处查看常见问题解答 (FAQ.md)](FAQ.md)**
 
-## 致谢
+## 🙏 致谢
 
 本项目在开发过程中参考了以下优秀项目，特此感谢：
 
@@ -294,7 +305,8 @@ WEB_PASSWORD=admin123
 
 以及感谢 ClaudeCode/ModelScope/Gemini 等模型/工具，解放双手 体验Vibe Coding的快乐。
 
-## 体会
+## 💭 体会
+
 本项目 90%+ 的代码都由AI生成，包括 ISSUE 中涉及的 PR 。
 
 Vibe Coding 的可怕之处在于如果不过多的参与项目建设，对AI生成的代码没有进行细致的review，没有思考过AI为什么这么写，盲目的通过跑测试用例验证功能可用性只会导致项目变成一个黑盒。
