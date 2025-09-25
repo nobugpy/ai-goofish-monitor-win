@@ -311,4 +311,6 @@ AI是万能的，能帮助开发者解决99%的编码问题，AI同样不是万�
 - 项目作者及贡献者不对因使用本软件而导致的任何直接、间接、附带或特殊的损害或损失承担责任。
 - 如需了解更多详细信息，请查看 [免责声明](DISCLAIMER.md) 文件。
 
-[![Star History Chart](https://api.star-history.com/svg?repos=dingyufei615/ai-goofish-monitor&type=Date)](https://star-history.com/#dingyufei615/ai-goofish-monitor&Date)
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Usagi-org/ai-goofish-monitor&type=Date)](https://www.star-history.com/#Usagi-org/ai-goofish-monitor&Date)
