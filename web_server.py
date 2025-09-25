@@ -344,11 +344,17 @@ async def run_single_task(task_id: int, task_name: str):
         # 将 stdout 和 stderr 重定向到日志文件
         # 在非 Windows 系统上，使用 setsid 创建新进程组，以便能终止整个进程树
         preexec_fn = os.setsid if sys.platform != "win32" else None
+        # 为子进程强制设置 UTF-8 输出，确保日志统一为 UTF-8 编码
+        child_env = os.environ.copy()
+        child_env["PYTHONIOENCODING"] = "utf-8"
+        child_env["PYTHONUTF8"] = "1"
+
         process = await asyncio.create_subprocess_exec(
             sys.executable, "-u", "spider_v2.py", "--task-name", task_name,
             stdout=log_file_handle,
             stderr=log_file_handle,
-            preexec_fn=preexec_fn
+            preexec_fn=preexec_fn,
+            env=child_env
         )
 
         # 等待进程结束
@@ -635,11 +641,17 @@ async def start_task_process(task_id: int, task_name: str):
         log_file_handle = open(log_file_path, 'a', encoding='utf-8')
 
         preexec_fn = os.setsid if sys.platform != "win32" else None
+        # 为子进程强制设置 UTF-8 输出，确保日志统一为 UTF-8 编码
+        child_env = os.environ.copy()
+        child_env["PYTHONIOENCODING"] = "utf-8"
+        child_env["PYTHONUTF8"] = "1"
+
         process = await asyncio.create_subprocess_exec(
             sys.executable, "-u", "spider_v2.py", "--task-name", task_name,
             stdout=log_file_handle,
             stderr=log_file_handle,
-            preexec_fn=preexec_fn
+            preexec_fn=preexec_fn,
+            env=child_env
         )
         scraper_processes[task_id] = process
         print(f"启动任务 '{task_name}' (PID: {process.pid})，日志输出到 {log_file_path}")
@@ -744,12 +756,8 @@ async def get_logs(from_pos: int = 0, username: str = Depends(verify_credentials
             await f.seek(from_pos)
             new_bytes = await f.read()
 
-        # 解码获取的字节
-        try:
-            new_content = new_bytes.decode('utf-8')
-        except UnicodeDecodeError:
-            # 如果 utf-8 失败，尝试用 gbk 读取，并忽略无法解码的字符
-            new_content = new_bytes.decode('gbk', errors='ignore')
+        # 解码获取的字节（统一按 UTF-8 解码，容错处理尾部可能出现的半个多字节字符）
+        new_content = new_bytes.decode('utf-8', errors='replace')
 
         return {"new_content": new_content, "new_pos": file_size}
 

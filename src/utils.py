@@ -4,6 +4,7 @@ import math
 import os
 import random
 import re
+from datetime import datetime
 from functools import wraps
 from urllib.parse import quote
 
@@ -59,6 +60,15 @@ async def random_sleep(min_seconds: float, max_seconds: float):
     delay = random.uniform(min_seconds, max_seconds)
     print(f"   [延迟] 等待 {delay:.2f} 秒... (范围: {min_seconds}-{max_seconds}s)")
     await asyncio.sleep(delay)
+
+
+def log_time(message: str, prefix: str = "") -> None:
+    """在日志前加上 YY-MM-DD HH:MM:SS 时间戳的简单打印。"""
+    try:
+        ts = datetime.now().strftime(' %Y-%m-%d %H:%M:%S')
+    except Exception:
+        ts = "--:--:--"
+    print(f"[{ts}] {prefix}{message}")
 
 
 def convert_goofish_link(url: str) -> str:

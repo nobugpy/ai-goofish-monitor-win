@@ -864,6 +864,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         await updateLogs(true);
+        autoRefreshCheckbox.click(); // Enable auto-refresh by default
     }
 
     async function fetchAndRenderResults() {
