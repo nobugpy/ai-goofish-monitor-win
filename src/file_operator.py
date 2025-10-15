@@ -1,12 +1,12 @@
 import aiofiles
 from pathlib import Path
-
+from typing import Optional
 
 class FileOperator:
     def __init__(self, filepath: str):
         self.filepath = filepath
 
-    async def read(self) -> str | None:
+    async def read(self) -> Optional[str]:
         """
         读取
         """

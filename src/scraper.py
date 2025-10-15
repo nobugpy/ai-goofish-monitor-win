@@ -25,6 +25,9 @@ from src.config import (
     RUN_HEADLESS,
     RUNNING_IN_DOCKER,
     STATE_FILE,
+    LATITUDE,
+    LONGITUDE,
+    AREA_TEXT
 )
 from src.parsers import (
     _parse_search_results_json,
@@ -183,7 +186,16 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                 browser = await p.chromium.launch(headless=RUN_HEADLESS)
             else:
                 browser = await p.chromium.launch(headless=RUN_HEADLESS, channel="chrome")
-        context = await browser.new_context(storage_state=STATE_FILE, user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+        # 增加地理定位
+        geolocation = None if not AREA_TEXT else {"latitude": float(LATITUDE), "longitude": float(LONGITUDE)}
+        context = await browser.new_context(
+            permissions=["geolocation"],  # 授予地理位置权限
+            geolocation=geolocation,  # 可选：直接指定位置
+            timezone_id="Asia/Shanghai",  # 可选：匹配时区
+            storage_state=STATE_FILE,
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        )
+
         page = await context.new_page()
 
         try:
@@ -249,6 +261,23 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
 
             final_response = None
             log_time("步骤 2 - 应用筛选条件...")
+            # 等待选择地区等条件
+            if AREA_TEXT:
+                max_attempts = 10
+                for i in range(max_attempts):
+                    elements = await page.query_selector_all('text=区域')
+                    if elements:
+                        await page.click('text=区域')
+                        await random_sleep(1, 3)  # 等待1秒再检查
+                        await page.click(f'text={AREA_TEXT}')
+                        break
+                    else:
+                        print("LOG: 未检测到地区按钮")
+                        await asyncio.sleep(1)
+                else:  # 循环正常结束（未找到元素）
+                    raise TimeoutError("等待超时：未找到地区相关元素")
+                await random_sleep(2, 4)
+
             await page.click('text=新发布')
             await random_sleep(2, 4) # 原来是 (1.5, 2.5)
             async with page.expect_response(lambda r: API_URL_PATTERN in r.url, timeout=20000) as response_info:

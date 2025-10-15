@@ -22,6 +22,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from src.file_operator import FileOperator
 from src.task import get_task, update_task
+from src.spider_core import run_spider_task,run_spider_tasks
 
 
 class Task(BaseModel):
@@ -338,37 +339,23 @@ async def run_single_task(task_id: int, task_name: str):
         # 确保日志目录存在，并以追加模式打开日志文件
         os.makedirs("logs", exist_ok=True)
         log_file_path = os.path.join("logs", "scraper.log")
+        # 重定向标准输出到日志文件
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
         log_file_handle = open(log_file_path, 'a', encoding='utf-8')
+        sys.stdout = log_file_handle
+        sys.stderr = log_file_handle
 
-        # 使用与Web服务器相同的Python解释器来运行爬虫脚本
-        # 将 stdout 和 stderr 重定向到日志文件
-        # 在非 Windows 系统上，使用 setsid 创建新进程组，以便能终止整个进程树
-        preexec_fn = os.setsid if sys.platform != "win32" else None
-        # 为子进程强制设置 UTF-8 输出，确保日志统一为 UTF-8 编码
-        child_env = os.environ.copy()
-        child_env["PYTHONIOENCODING"] = "utf-8"
-        child_env["PYTHONUTF8"] = "1"
-
-        process = await asyncio.create_subprocess_exec(
-            sys.executable, "-u", "spider_v2.py", "--task-name", task_name,
-            stdout=log_file_handle,
-            stderr=log_file_handle,
-            preexec_fn=preexec_fn,
-            env=child_env
-        )
-
-        # 等待进程结束
-        await process.wait()
-        if process.returncode == 0:
-            print(f"定时任务 '{task_name}' 执行成功。日志已写入 {log_file_path}")
-        else:
-            print(f"定时任务 '{task_name}' 执行失败。返回码: {process.returncode}。详情请查看 {log_file_path}")
-
+        # 直接调用爬虫逻辑（替代子进程调用）
+        result = await run_spider_task(task_name=task_name)
+        print(f"定时任务 '{task_name}' 执行成功。处理了 {result} 个新商品")
     except Exception as e:
-        print(f"启动定时任务 '{task_name}' 时发生错误: {e}")
+        print(f"定时任务 '{task_name}' 执行失败: {e}")
     finally:
         # 确保文件句柄被关闭
         if log_file_handle:
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
             log_file_handle.close()
         # 任务结束后，更新状态为“已停止”
         await update_task_running_status(task_id, False)
@@ -616,7 +603,7 @@ async def update_task_api(task_id: int, task_update: TaskUpdate, username: str =
     # 如果任务从“启用”变为“禁用”，且正在运行，则先停止它
     if 'enabled' in update_data and not update_data['enabled']:
         if scraper_processes.get(task_id):
-            print(f"任务 '{tasks[task_id]['task_name']}' 已被禁用，正在停止其进程...")
+            print(f"任务 '{task.get('task_name')}' 已被禁用，正在停止其进程...")
             await stop_task_process(task_id) # 这会处理进程和is_running状态
 
     task.update(update_data)
@@ -629,38 +616,38 @@ async def update_task_api(task_id: int, task_update: TaskUpdate, username: str =
     return {"message": "任务更新成功。", "task": task}
 
 async def start_task_process(task_id: int, task_name: str):
-    """内部函数：启动一个指定的任务进程。"""
-    global scraper_processes
-    if scraper_processes.get(task_id) and scraper_processes[task_id].returncode is None:
-        print(f"任务 '{task_name}' (ID: {task_id}) 已在运行中。")
-        return
-
+    """手动启动单个任务（替代原有的子进程调用）"""
+    print(f"手动触发任务: 启动 '{task_name}' ...")
+    log_file_handle = None
     try:
+        # 更新任务状态为运行中
+        await update_task_running_status(task_id, True)
+
+        # 确保日志目录存在
         os.makedirs("logs", exist_ok=True)
         log_file_path = os.path.join("logs", "scraper.log")
+
+        # 重定向标准输出到日志文件
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
         log_file_handle = open(log_file_path, 'a', encoding='utf-8')
+        sys.stdout = log_file_handle
+        sys.stderr = log_file_handle
 
-        preexec_fn = os.setsid if sys.platform != "win32" else None
-        # 为子进程强制设置 UTF-8 输出，确保日志统一为 UTF-8 编码
-        child_env = os.environ.copy()
-        child_env["PYTHONIOENCODING"] = "utf-8"
-        child_env["PYTHONUTF8"] = "1"
+        # 直接调用爬虫逻辑（替代子进程）
+        total = await run_spider_tasks(task_names=[task_name])  # 只运行指定任务
+        print(f"手动任务 '{task_name}' 执行完成，共处理 {total} 个新商品")
 
-        process = await asyncio.create_subprocess_exec(
-            sys.executable, "-u", "spider_v2.py", "--task-name", task_name,
-            stdout=log_file_handle,
-            stderr=log_file_handle,
-            preexec_fn=preexec_fn,
-            env=child_env
-        )
-        scraper_processes[task_id] = process
-        print(f"启动任务 '{task_name}' (PID: {process.pid})，日志输出到 {log_file_path}")
-
-        # 更新配置文件中的状态
-        await update_task_running_status(task_id, True)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"启动任务 '{task_name}' 进程时出错: {e}")
-
+        print(f"手动任务 '{task_name}' 执行失败: {e}")
+    finally:
+        # 恢复标准输出
+        if log_file_handle:
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
+            log_file_handle.close()
+        # 更新任务状态为已停止
+        await update_task_running_status(task_id, False)
 
 async def stop_task_process(task_id: int):
     """内部函数：停止一个指定的任务进程。"""

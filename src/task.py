@@ -6,7 +6,6 @@ from typing import Optional
 from src.config import CONFIG_FILE
 from src.file_operator import FileOperator
 
-
 class Task(BaseModel):
     task_name: str
     enabled: bool
@@ -65,7 +64,7 @@ async def update_task(task_id: int, task: Task) -> bool:
     return await config_file_op.write(json.dumps(config_data, ensure_ascii=False, indent=2))
 
 
-async def get_task(task_id: int) -> Task | None:
+async def get_task(task_id: int) -> Optional[Task]:
     config_file_op = FileOperator(CONFIG_FILE)
     config_data_str = await config_file_op.read()
 
