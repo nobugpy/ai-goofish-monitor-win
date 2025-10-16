@@ -3,3 +3,4 @@ logs/
 jsonl/
 .env
 xianyu_state.json
+qrcode.png

@@ -12,6 +12,9 @@ RUNNING_IN_DOCKER = os.getenv("RUNNING_IN_DOCKER", "false").lower() == "true"
 
 async def main():
     async with async_playwright() as p:
+        print(f"***********************************************************")
+        print(f"项目源代码：https://github.com/nobugpy/ai-goofish-monitor-win")
+        print(f"***********************************************************")
         print("正在启动浏览器...")
         if LOGIN_IS_EDGE:
             browser = await p.chromium.launch(headless=False, channel="msedge")

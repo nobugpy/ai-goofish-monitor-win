@@ -1173,7 +1173,9 @@ if __name__ == "__main__":
     # 设置默认编码
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
-
+    print(f"***********************************************************")
+    print(f"项目源代码：https://github.com/nobugpy/ai-goofish-monitor-win")
+    print(f"***********************************************************")
     print(f"启动 Web 管理界面，请在浏览器访问 http://127.0.0.1:{server_port}")
 
     # 启动 Uvicorn 服务器
