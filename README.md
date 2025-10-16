@@ -37,7 +37,7 @@
     | `OPENAI_BASE_URL` | AI模型的API接口地址，必须兼容OpenAI格式。 | 是 | 请填写API的基础路径，例如 `https://dashscope.aliyuncs.com/compatible-mode/v1/`。 |
     | `OPENAI_MODEL_NAME` | 你要使用的具体模型名称。               | 是 | **必须**选择一个支持图片分析的多模态模型，如 `doubao-seed-1-6-250615`, `qwen-vl-plus` 等。 |  
     | `SERVER_PORT` | Web UI服务的运行端口。             | 否 | 默认为 `8000`。                                                          |
-    | `LATITUDE` | 筛选城市的纬度                    | 否 | 【新增参数】不需要筛选地区则不填，需求打开浏览器的定位权限。                                       |
+    | `LATITUDE` | 筛选城市的纬度                    | 否 | 【新增参数】不需要筛选地区则不填，需要打开浏览器的定位权限。                                       |
     | `LONGITUDE` | 筛选城市的经度                    | 否 | 【新增参数】                                                               |
     | `AREA_TEXT` | 要筛选的地区                     | 否 | 【新增参数】不需要筛选地区则不填。                                                    |
 
